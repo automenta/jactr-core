@@ -13,15 +13,10 @@
  */
 package org.jactr.core.queue.collection;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import java.util.*;
 
 /**
  * Crazy prioritized queue (bad name.. whatever) that had to be implemented for
@@ -37,155 +32,142 @@ import org.apache.commons.logging.LogFactory;
  * You call Collection<T> remove(double) to remove all items from the queue
  * that have priorities less than or equal to the value.<br>
  * <b>Note</b>: this is not thread safe
- * 
+ *
  * @author developer
  */
-public class PrioritizedQueue<T>
-{
-  /**
-   * logger definition
-   */
-  static private final Log                 LOGGER = LogFactory
-                                                      .getLog(PrioritizedQueue.class);
-
-  private IPrioritizer<T>                  _prioritizer;
-
-  private SortedMap<Double, Collection<T>> _backingMap;
-
-  private int                              _size;
-
-  public PrioritizedQueue(IPrioritizer<T> prioritizer)
-  {
-    _prioritizer = prioritizer;
-    _backingMap = new TreeMap<Double, Collection<T>>();
-  }
-  
-  synchronized public void clear()
-  {
-    _backingMap.clear();
-  }
-
-  synchronized public void add(T item)
-  {
-    double priority = _prioritizer.getPriority(item);
-    if (Double.isNaN(priority))
-      throw new IllegalArgumentException("Invalid priority of " + item +
-          ", must not be NaN");
-
-    Collection<T> itemsOfSamePriority = _backingMap.get(priority);
-    if (itemsOfSamePriority == null)
-    {
-      itemsOfSamePriority = new ArrayList<T>();
-      _backingMap.put(priority, itemsOfSamePriority);
-    }
-    itemsOfSamePriority.add(item);
-    _size++;
-  }
-  
-  synchronized public boolean remove(T item)
-  {
-    double priority = _prioritizer.getPriority(item);
-    if (Double.isNaN(priority))
-      throw new IllegalArgumentException("Invalid priority of " + item +
-          ", must not be NaN");
-
-    Collection<T> itemsOfSamePriority = _backingMap.get(priority);
-    if (itemsOfSamePriority == null) return false;
-    
-    itemsOfSamePriority.remove(item);
-    _size--;
-    return true;
-  }
-
-  /**
-   * return all the items of less than or equal to upThrough
-   * 
-   * @param upThrough
-   * @return
-   */
-  synchronized public void remove(double upThrough, Collection<T> removedEvents)
-  {
-    if (_backingMap.isEmpty()) return;
-
-    double firstKey = _backingMap.firstKey();
-
-    if (firstKey > upThrough) return;
-    
-    int originalSize = removedEvents.size();
-
-    if (firstKey != upThrough)
-    {
-      /*
-       * snag collections from lowest to upToPriority(exclusive)
-       */
-      Iterator<Map.Entry<Double, Collection<T>>> itr = _backingMap.subMap(
-          firstKey, upThrough).entrySet().iterator();
-      while (itr.hasNext())
-      {
-        removedEvents.addAll(itr.next().getValue());
-        itr.remove();
-      }
-    }
-
-    /*
-     * that took care of everyone from low to priority(exclusive) - now we need
-     * priority
+public class PrioritizedQueue<T> {
+    /**
+     * logger definition
      */
-    Collection<T> atPriority = _backingMap.remove(upThrough);
-    if (atPriority != null) removedEvents.addAll(atPriority);
+    static private final Log LOGGER = LogFactory
+            .getLog(PrioritizedQueue.class);
 
-    _size -= (removedEvents.size()-originalSize);
-  }
+    private IPrioritizer<T> _prioritizer;
 
-  /**
-   * return all the elements in order of priority (and insertion if priorities
-   * are the same)
-   * 
-   * @return
-   */
-  synchronized public Collection<T> get()
-  {
-    ArrayList<T> rtn = new ArrayList<T>();
+    private SortedMap<Double, Collection<T>> _backingMap;
 
-    if (_backingMap.isEmpty()) return rtn;
-    for (Map.Entry<Double, Collection<T>> entry : _backingMap.entrySet())
-      rtn.addAll(entry.getValue());
+    private int _size;
 
-    return rtn;
-  }
+    public PrioritizedQueue(IPrioritizer<T> prioritizer) {
+        _prioritizer = prioritizer;
+        _backingMap = new TreeMap<Double, Collection<T>>();
+    }
 
-  /**
-   * first key, or NaN if empty
-   * 
-   * @return
-   */
-  synchronized public double getFirstPriority()
-  {
-    if (!_backingMap.isEmpty()) return _backingMap.firstKey();
-    return Double.NaN;
-  }
+    synchronized public void clear() {
+        _backingMap.clear();
+    }
 
-  /**
-   * first key after afterPriority, or NaN
-   * 
-   * @param afterPriority
-   * @return
-   */
-  synchronized public double getFirstPriorityAfter(double afterPriority)
-  {
-    SortedMap<Double, Collection<T>> submap = _backingMap.subMap(_backingMap
-        .firstKey(), afterPriority);
-    if (!submap.isEmpty()) return submap.firstKey();
-    return Double.NaN;
-  }
+    synchronized public void add(T item) {
+        double priority = _prioritizer.getPriority(item);
+        if (Double.isNaN(priority))
+            throw new IllegalArgumentException("Invalid priority of " + item +
+                    ", must not be NaN");
 
-  synchronized public boolean isEmpty()
-  {
-    return _backingMap.isEmpty();
-  }
+        Collection<T> itemsOfSamePriority = _backingMap.get(priority);
+        if (itemsOfSamePriority == null) {
+            itemsOfSamePriority = new ArrayList<T>();
+            _backingMap.put(priority, itemsOfSamePriority);
+        }
+        itemsOfSamePriority.add(item);
+        _size++;
+    }
 
-  public int getSize()
-  {
-    return _size;
-  }
+    synchronized public boolean remove(T item) {
+        double priority = _prioritizer.getPriority(item);
+        if (Double.isNaN(priority))
+            throw new IllegalArgumentException("Invalid priority of " + item +
+                    ", must not be NaN");
+
+        Collection<T> itemsOfSamePriority = _backingMap.get(priority);
+        if (itemsOfSamePriority == null) return false;
+
+        itemsOfSamePriority.remove(item);
+        _size--;
+        return true;
+    }
+
+    /**
+     * return all the items of less than or equal to upThrough
+     *
+     * @param upThrough
+     * @return
+     */
+    synchronized public void remove(double upThrough, Collection<T> removedEvents) {
+        if (_backingMap.isEmpty()) return;
+
+        double firstKey = _backingMap.firstKey();
+
+        if (firstKey > upThrough) return;
+
+        int originalSize = removedEvents.size();
+
+        if (firstKey != upThrough) {
+            /*
+             * snag collections from lowest to upToPriority(exclusive)
+             */
+            Iterator<Map.Entry<Double, Collection<T>>> itr = _backingMap.subMap(
+                    firstKey, upThrough).entrySet().iterator();
+            while (itr.hasNext()) {
+                removedEvents.addAll(itr.next().getValue());
+                itr.remove();
+            }
+        }
+
+        /*
+         * that took care of everyone from low to priority(exclusive) - now we need
+         * priority
+         */
+        Collection<T> atPriority = _backingMap.remove(upThrough);
+        if (atPriority != null) removedEvents.addAll(atPriority);
+
+        _size -= (removedEvents.size() - originalSize);
+    }
+
+    /**
+     * return all the elements in order of priority (and insertion if priorities
+     * are the same)
+     *
+     * @return
+     */
+    synchronized public Collection<T> get() {
+
+        if (_backingMap.isEmpty()) return Collections.emptyList();
+
+        ArrayList<T> rtn = new ArrayList<T>();
+        for (Collection<T> entry : _backingMap.values())
+            rtn.addAll(entry);
+
+        return rtn;
+    }
+
+    /**
+     * first key, or NaN if empty
+     *
+     * @return
+     */
+    synchronized public double getFirstPriority() {
+        if (!_backingMap.isEmpty()) return _backingMap.firstKey();
+        return Double.NaN;
+    }
+
+    /**
+     * first key after afterPriority, or NaN
+     *
+     * @param afterPriority
+     * @return
+     */
+    synchronized public double getFirstPriorityAfter(double afterPriority) {
+        SortedMap<Double, Collection<T>> submap = _backingMap.subMap(_backingMap
+                .firstKey(), afterPriority);
+        if (!submap.isEmpty()) return submap.firstKey();
+        return Double.NaN;
+    }
+
+    synchronized public boolean isEmpty() {
+        return _backingMap.isEmpty();
+    }
+
+    public int getSize() {
+        return _size;
+    }
 }

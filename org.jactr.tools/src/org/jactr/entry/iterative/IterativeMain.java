@@ -331,8 +331,8 @@ public class IterativeMain
     /*
      * remove any runtime listeners that were installed
      */
-    for (IACTRRuntimeListener runtimeListener : runtime.getListeners())
-      runtime.removeListener(runtimeListener);
+    runtime.getListeners().forEach(runtime::removeListener);
+
 
     /*
      * kill the executors

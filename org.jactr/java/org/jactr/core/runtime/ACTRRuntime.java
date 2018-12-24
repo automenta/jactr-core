@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.Executor;
+import java.util.stream.Stream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -270,7 +271,7 @@ public class ACTRRuntime
     return _eventDispatcher.hasListeners();
   }
 
-  public Collection<IACTRRuntimeListener> getListeners()
+  public Stream<IACTRRuntimeListener> getListeners()
   {
     return _eventDispatcher.getListeners();
   }

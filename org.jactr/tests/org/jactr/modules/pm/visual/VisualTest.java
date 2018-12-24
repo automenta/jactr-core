@@ -68,7 +68,8 @@ public class VisualTest
       config.sensor(new XMLSensor()).client().local().connectAt("997")
         .configure().credentials(a).configure(Collections.singletonMap(
               "XMLSensor.DataURI",
-              "org/jactr/modules/pm/visual/sensorData.xml"));
+              "org/jactr/modules/pm/visual/sensorData.xml"
+      ));
 
       Runnable startup = (Runnable) config.server().local().connectAt("997")
           .configure()

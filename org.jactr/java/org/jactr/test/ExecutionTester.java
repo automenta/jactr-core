@@ -88,7 +88,6 @@ public class ExecutionTester implements IInstrument, IParameterized
       IInstantiation instantiation)
   {
     Iterator<String> productionSequence = _productionSequence;
-    Set<String> failedProductions = _failedProductions;
 
     String productionName = instantiation.getProduction()
         .getSymbolicProduction().getName();
@@ -97,7 +96,7 @@ public class ExecutionTester implements IInstrument, IParameterized
     if (_ignoreProductions.contains(productionName)) return;
 
     // is this a fail fast production?
-    if (failedProductions.contains(productionName)) throw new RuntimeException(
+    if (_failedProductions.contains(productionName)) throw new RuntimeException(
         "(" + model + ") " + productionName + " is never supposed to fire");
 
     // finally check the sequence

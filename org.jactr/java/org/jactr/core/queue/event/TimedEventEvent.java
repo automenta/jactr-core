@@ -85,6 +85,7 @@ public class TimedEventEvent extends
       default:
         if (LOGGER.isWarnEnabled())
           LOGGER.warn("No clue what to do with type " + this.getType());
+        break;
     }
 
   }
